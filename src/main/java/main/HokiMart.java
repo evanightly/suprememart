@@ -23,6 +23,36 @@ public class HokiMart {
             return ServiceOperation.getAllCashiers();
         });
 
+        post("/transaction", (req, res) -> {
+            UrlEncoded.decodeTo(req.body(), bodyParser, "UTF-8");
+            int id_transaction = Integer.parseInt(bodyParser.getString("id_transaction"));
+            int id_employee = Integer.parseInt(bodyParser.getString("id_employee"));
+            String customer_name = bodyParser.getString("customer_name");
+            float total = Float.parseFloat(bodyParser.getString("total"));
+            return ServiceOperation.addTransaction(id_transaction, id_employee, customer_name, total);
+        });
+
+        get("/transaction", (req, res) -> {
+            return ServiceOperation.getAllTransactions();
+        });
+
+        get("/transaction/last", (req, res) -> {
+            return ServiceOperation.getLastIdTransaction();
+        });
+
+        post("/detail_transaction", (req, res) -> {
+            UrlEncoded.decodeTo(req.body(), bodyParser, "UTF-8");
+            int id_transaction = Integer.parseInt(bodyParser.getString("id_transaction"));
+            int id_item = Integer.parseInt(bodyParser.getString("item_id"));
+            int quantity = Integer.parseInt(bodyParser.getString("quantity"));
+            float subtotal = Float.parseFloat(bodyParser.getString("subtotal"));
+            return ServiceOperation.addDetailTransaction(id_transaction, id_item, quantity, subtotal);
+        });
+
+        get("/item", (req, res) -> {
+            return ServiceOperation.getAllItems();
+        });
+
 //        get("/test", "application/json", (req, res) -> {
 //            System.out.println(ServiceOperation.login());
 //            return ServiceOperation.login();

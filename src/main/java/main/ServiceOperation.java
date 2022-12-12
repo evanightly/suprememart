@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import model.Cashier;
 import model.Employee;
+import model.Item;
 import model.Manager;
+import model.Transaction;
 
 public class ServiceOperation {
 
@@ -59,6 +61,58 @@ public class ServiceOperation {
         rs = st.getResultSet();
         while (rs.next()) {
             c.add(new Cashier(rs.getInt("id_employee"), rs.getString("name"), rs.getString("username"), rs.getString("password"), rs.getInt("age"), rs.getFloat("salary"), rs.getInt("years_experienced"), rs.getInt("transaction_handled")));
+        }
+        String jsonString = new Gson().toJson(c);
+        return jsonString;
+    }
+
+    public static String getAllTransactions() throws SQLException {
+        st = db.createStatement();
+        String sql = "SELECT * FROM transaction t JOIN detail_transaction dt ON t.id_transaction = dt.id_transaction JOIN employee e ON t.id_employee = e.id_employee GROUP BY t.id_transaction";
+        List<Transaction> c = new ArrayList<>();
+        st.execute(sql);
+        rs = st.getResultSet();
+        while (rs.next()) {
+            c.add(new Transaction(rs.getInt("id_transaction"), rs.getString("name"), rs.getString("customer_name"), rs.getString("transaction_date"), rs.getFloat("total")));
+        }
+        String jsonString = new Gson().toJson(c);
+        return jsonString;
+    }
+
+    public static int getLastIdTransaction() throws SQLException {
+        int id = 0;
+        st = db.createStatement();
+        String sql = "SELECT id_transaction FROM transaction ORDER BY id_transaction ASC";
+        st.execute(sql);
+        rs = st.getResultSet();
+        while(rs.next()) {
+            id = rs.getInt(1);
+        }
+        return id;
+    }
+
+    public static Boolean addTransaction(int id_transaction, int id_employee, String customer_name, float total) throws SQLException {
+        st = db.createStatement();
+        String transactionSql = String.format("INSERT INTO transaction (id_transaction, id_employee, customer_name, total) VALUES(%d, %d, %s, %f)", id_transaction, id_employee, customer_name, total);
+        st.executeQuery(transactionSql);
+        return true;
+    }
+
+    public static Boolean addDetailTransaction(int id_transaction, int id_item, int quantity, float subtotal) throws SQLException {
+        st = db.createStatement();
+        String detailTransactionSql = String.format("INSERT INTO detail_transaction (id_transaction, id_item, quantity, subtotal)", id_transaction, id_item, quantity, subtotal);
+        st.executeQuery(detailTransactionSql);
+        return true;
+    }
+
+    public static String getAllItems() throws SQLException {
+        st = db.createStatement();
+        String sql = "SELECT i.*, c.title category FROM item i JOIN category c ON i.id_category = c.id_category GROUP BY i.id_item";
+        List<Item> c = new ArrayList<>();
+        st.execute(sql);
+        rs = st.getResultSet();
+        while (rs.next()) {
+            c.add(new Item(rs.getInt("id_item"), rs.getString("category"), rs.getString("title"), rs.getString("description"), rs.getFloat("price"), rs.getInt("in_stock")));
         }
         String jsonString = new Gson().toJson(c);
         return jsonString;

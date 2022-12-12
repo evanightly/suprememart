@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <script defer src="assets/js/jquery-3.6.1.min.js"></script>
     <script defer src="assets/js/script.js"></script>
-    <title>Employee</title>
+    <title>Transactions</title>
 </head>
 
 <body>
@@ -24,7 +24,10 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/employee.html">Employees</a>
+                        <a class="nav-link active" aria-current="page" href="/transaction.html">Transactions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/transaction_add.html">Add Transaction</a>
                     </li>
                 </ul>
 
@@ -38,20 +41,17 @@
         </div>
     </nav>
 
-    <section class="employee">
+    <section class="transaction">
         <div class="container">
-            <h1>Employees</h1>
+            <h1>Transactions</h1>
             <table class="table table-hover">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Name</th>
-                        <th>Username</th>
-                        <th>Password</th>
-                        <th>Age</th>
-                        <th>Salary</th>
-                        <th>Years Experienced</th>
-                        <th>Transaction Handled</th>
+                        <th>Employee</th>
+                        <th>Customer Name</th>
+                        <th>Transaction Date</th>
+                        <th>Total</th>
                         <th>Option</th>
                     </tr>
                 </thead>
