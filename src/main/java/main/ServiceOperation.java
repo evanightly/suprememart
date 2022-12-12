@@ -21,11 +21,10 @@ public class ServiceOperation {
     static Connection db = Connect.getConnection();
 
     public static Employee login(String username, String password) throws SQLException {
-        db = Connect.getConnection();
         st = db.createStatement();
         String managerSql = String.format("SELECT * FROM employee e JOIN manager c ON e.id_employee = c.id_employee WHERE username = '%s' AND password = '%s' LIMIT 1", username, password);
         rs = st.executeQuery(managerSql);
-        System.out.println(rs);
+        Employee result = null;
         while (rs.next()) {
             int id_employee = rs.getInt("id_employee");
             int age = rs.getInt("age");
@@ -35,7 +34,7 @@ public class ServiceOperation {
             String role_title = rs.getString("role_title");
             String jsonString = new Gson().toJson(new Manager(id_employee, name, username, password, age, salary, years_experienced, role_title));
             System.out.println(jsonString);
-            return new Manager(id_employee, name, username, password, age, salary, years_experienced, role_title);
+            result = new Manager(id_employee, name, username, password, age, salary, years_experienced, role_title);
         }
         String cashierSql = String.format("SELECT * FROM employee e JOIN cashier c ON e.id_employee = c.id_employee WHERE username = '%s' AND password = '%s' LIMIT 1", username, password);
         rs = st.executeQuery(cashierSql);
@@ -48,9 +47,57 @@ public class ServiceOperation {
             int transaction_handled = rs.getInt("transaction_handled");
             String jsonString = new Gson().toJson(new Cashier(id_employee, name, username, password, age, salary, years_experienced, transaction_handled));
             System.out.println(jsonString);
-            return new Cashier(id_employee, name, username, password, age, salary, years_experienced, transaction_handled);
+            result = new Cashier(id_employee, name, username, password, age, salary, years_experienced, transaction_handled);
         }
-        return null;
+        return result;
+    }
+
+    public static boolean addCashier(int id_employee, String name, String username, String password, int age, float salary, int years_experienced)  {
+        try {
+            st = db.createStatement();
+            String sql = String.format("INSERT INTO employee (id_employee, name, username, password, age, salary, years_experienced) VALUES (%d, '%s', '%s', '%s', %d, %f, %d)", id_employee, name, username, password, age, salary, years_experienced);
+            st.executeUpdate(sql);
+            sql = String.format("INSERT INTO cashier (id_employee, transaction_handled) VALUES(%d, %d)", id_employee, 0);
+            st.executeUpdate(sql);
+            return true;
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return true;
+    }
+
+    public static boolean removeCashier(int id_employee) {
+        try {
+            st = db.createStatement();
+            String sql = "SELECT * FROM transaction t JOIN employee e ON t.id_employee = e.id_employee WHERE t.id_employee = " + id_employee;
+            st.execute(sql);
+            rs = st.getResultSet();
+            while (rs.next()) {
+                System.out.println(rs.getInt("id_employee"));
+                sql = String.format("DELETE FROM transaction WHERE id_employee = ", rs.getInt("id_employee"));
+                st.executeUpdate(sql);
+            }
+            sql = "DELETE FROM cashier WHERE id_employee = " + id_employee;
+            st.executeUpdate(sql);
+            sql = "DELETE FROM employee WHERE id_employee = " + id_employee;
+            st.executeUpdate(sql);
+            return true;
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return true;
+    }
+
+    public static int getLastIdEmployee() throws SQLException {
+        int id = 0;
+        st = db.createStatement();
+        String sql = "SELECT id_employee FROM employee ORDER BY id_employee ASC";
+        st.execute(sql);
+        rs = st.getResultSet();
+        while (rs.next()) {
+            id = rs.getInt(1);
+        }
+        return id;
     }
 
     public static String getAllCashiers() throws SQLException {
@@ -85,23 +132,38 @@ public class ServiceOperation {
         String sql = "SELECT id_transaction FROM transaction ORDER BY id_transaction ASC";
         st.execute(sql);
         rs = st.getResultSet();
-        while(rs.next()) {
+        while (rs.next()) {
             id = rs.getInt(1);
         }
         return id;
     }
 
-    public static Boolean addTransaction(int id_transaction, int id_employee, String customer_name, float total) throws SQLException {
-        st = db.createStatement();
-        String transactionSql = String.format("INSERT INTO transaction (id_transaction, id_employee, customer_name, total) VALUES(%d, %d, %s, %f)", id_transaction, id_employee, customer_name, total);
-        st.executeQuery(transactionSql);
+    public static Boolean addTransaction(int id_transaction, int id_employee, String customer_name, float total) {
+        try {
+            st = db.createStatement();
+            String transactionSql = String.format("INSERT INTO transaction (id_transaction, id_employee, customer_name, total) VALUES(%d, %d, '%s', %f)", id_transaction, id_employee, customer_name, total);
+            st.executeUpdate(transactionSql);
+            return true;
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
         return true;
     }
 
-    public static Boolean addDetailTransaction(int id_transaction, int id_item, int quantity, float subtotal) throws SQLException {
-        st = db.createStatement();
-        String detailTransactionSql = String.format("INSERT INTO detail_transaction (id_transaction, id_item, quantity, subtotal)", id_transaction, id_item, quantity, subtotal);
-        st.executeQuery(detailTransactionSql);
+    public static Boolean addDetailTransaction(int id_transaction, int id_item, int quantity, float subtotal) {
+        try {
+            st = db.createStatement();
+            System.out.println(id_transaction);
+            System.out.println(id_item);
+            System.out.println(quantity);
+            System.out.println(subtotal);
+            String detailTransactionSql = String.format("INSERT INTO detail_transaction (id_transaction, id_item, quantity, subtotal) VALUES (%d, %d, %d, %f)", id_transaction, id_item, quantity, subtotal);
+            System.out.println(detailTransactionSql);
+            st.executeUpdate(detailTransactionSql);
+            return true;
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
         return true;
     }
 

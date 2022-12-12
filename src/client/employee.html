@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="assets/css/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
+    <script defer src="assets/js/bootstrap.bundle.min.js"></script>
     <script defer src="assets/js/jquery-3.6.1.min.js"></script>
     <script defer src="assets/js/script.js"></script>
     <title>Employee</title>
@@ -30,7 +31,7 @@
 
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="/login.html">Logout</a>
+                        <a id="logout" class="nav-link" href="/login.html">Logout</a>
                     </li>
                 </ul>
 
@@ -39,8 +40,66 @@
     </nav>
 
     <section class="employee">
+
         <div class="container">
-            <h1>Employees</h1>
+            <div class="col-12 d-flex justify-content-between">
+                <h1>Employees</h1>
+
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployee">
+                    <i class="bi bi-person-add"></i>
+                </button>
+
+                <div class="modal fade" id="addEmployee" tabindex="-1">
+                    <form>
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5">Add New Employee</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form">
+                                        <div class="form-group mb-3">
+                                            <label for="name" class="form-label">Name</label>
+                                            <input id="name" name="name" type="text" class="form-control" required>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="username" class="form-label">Username</label>
+                                            <input id="username" name="username" type="text" class="form-control"
+                                                required>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="password" class="form-label">Password</label>
+                                            <input id="password" name="password" type="text" class="form-control"
+                                                required>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="age" class="form-label">Age</label>
+                                            <input id="age" name="age" type="number" class="form-control" required>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="salary" class="form-label">Salary</label>
+                                            <input id="salary" name="salary" type="number" class="form-control"
+                                                required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="years_experienced" class="form-label">Years Experienced</label>
+                                            <input id="years_experienced" name="years_experienced" type="number"
+                                                class="form-control" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Register</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
             <table class="table table-hover">
                 <thead>
                     <tr>
