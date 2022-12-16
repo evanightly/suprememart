@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import model.Cashier;
+import model.Detail_Transaction;
 import model.Employee;
 import model.Item;
 import model.Manager;
@@ -52,7 +53,7 @@ public class ServiceOperation {
         return result;
     }
 
-    public static boolean addCashier(int id_employee, String name, String username, String password, int age, float salary, int years_experienced)  {
+    public static boolean addCashier(int id_employee, String name, String username, String password, int age, float salary, int years_experienced) {
         try {
             st = db.createStatement();
             String sql = String.format("INSERT INTO employee (id_employee, name, username, password, age, salary, years_experienced) VALUES (%d, '%s', '%s', '%s', %d, %f, %d)", id_employee, name, username, password, age, salary, years_experienced);
@@ -126,6 +127,19 @@ public class ServiceOperation {
         return jsonString;
     }
 
+    public static String getTransaction(int id) throws SQLException {
+        st = db.createStatement();
+        String sql = "SELECT i.title item, c.title category, i.description, i.price, dt.quantity, dt.subtotal  FROM transaction t JOIN detail_transaction dt ON t.id_transaction = dt.id_transaction JOIN item i ON dt.id_item = i.id_item JOIN category c ON i.id_category = c.id_category  WHERE t.id_transaction = " + id;
+        List<Detail_Transaction> c = new ArrayList<>();
+        st.execute(sql);
+        rs = st.getResultSet();
+        while (rs.next()) {
+            c.add(new Detail_Transaction(rs.getString("item"), rs.getString("category"), rs.getString("description"), rs.getFloat("price"), rs.getInt("quantity"), rs.getFloat("subtotal")));
+        }
+        String jsonString = new Gson().toJson(c);
+        return jsonString;
+    }
+
     public static int getLastIdTransaction() throws SQLException {
         int id = 0;
         st = db.createStatement();
@@ -148,6 +162,26 @@ public class ServiceOperation {
             System.out.println(e);
         }
         return true;
+    }
+
+    public static Boolean removeTransaction(int id_transaction) {
+        try {
+            st = db.createStatement();
+            String sql = "SELECT * FROM transaction t JOIN detail_transaction dt ON t.id_transaction = dt.id_transaction WHERE t.id_transaction = " + id_transaction;
+            st.execute(sql);
+            ResultSet rs = st.getResultSet();
+            while (rs.next()) {
+                System.out.println(rs.getInt("id_detail_transaction"));
+                sql = String.format("DELETE FROM detail_transaction WHERE id_detail_transaction = %d", rs.getInt("id_detail_transaction"));
+                st.executeUpdate(sql);
+            }
+            sql = "DELETE FROM transaction WHERE id_transaction = " + id_transaction;
+            st.executeUpdate(sql);
+            return true;
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return false;
     }
 
     public static Boolean addDetailTransaction(int id_transaction, int id_item, int quantity, float subtotal) {

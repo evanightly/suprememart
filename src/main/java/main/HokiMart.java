@@ -61,6 +61,16 @@ public class HokiMart {
             return ServiceOperation.getLastIdTransaction();
         });
 
+        post("/transaction/delete/:id", (req, res) -> {
+            int id = Integer.parseInt(req.params("id"));
+            return ServiceOperation.removeTransaction(id);
+        });
+
+        get("/transaction/:id", (req, res) -> {
+            int id = Integer.parseInt(req.params("id"));
+            return ServiceOperation.getTransaction(id);
+        });
+
         post("/detail_transaction", (req, res) -> {
             MultiMap bodyParser = new MultiMap();
             UrlEncoded.decodeTo(req.body(), bodyParser, "UTF-8");

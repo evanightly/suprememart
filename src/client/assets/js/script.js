@@ -5,7 +5,12 @@ const isLogged = () => {
         location.assign('/login.html')
     }
 }
-
+const deleteTransaction = (id) => {
+    console.log('e')
+    $.post(SERVER_HOST + '/transaction/delete/' + id).then(data => {
+        location.reload()
+    }).catch(err => console.log(err))
+}
 const loggedEmployeData = JSON.parse(JSON.parse(sessionStorage.getItem('logged')));
 
 const restrict = (employee) => {
@@ -117,7 +122,7 @@ if (window.location.href.search('login') > -1) {
 
     $('.transaction_add form').on('submit', (e) => {
         e.preventDefault();
-        let id_transaction = 1, total = 0, id_employee = 1;
+        let id_transaction = 1, total = 0, id_employee = JSON.parse(JSON.parse(sessionStorage.getItem('logged'))).id_employee;
         const customer_name = $('input[name="customer_name"]').val()
         let transaction_details = []
 
@@ -139,6 +144,7 @@ if (window.location.href.search('login') > -1) {
                 for (const detail of transaction_details) {
                     // console.log({ id_transaction, id_item: detail.id_item, quantity: detail.item_quantity, subtotal: detail.item_subtotal })
                     $.post(SERVER_HOST + '/detail_transaction', { id_transaction, id_item: detail.id_item, quantity: detail.item_quantity, subtotal: detail.item_subtotal })
+                    location.assign('/transaction.html')
                 }
             })
         }).catch(err => console.log(err))
@@ -148,18 +154,46 @@ if (window.location.href.search('login') > -1) {
 
     const tableBody = $('section.transaction table tbody')
     $.get(SERVER_HOST + '/transaction')
-        .then(data => {
+        .then(async data => {
             const sourceData = JSON.parse(data)
             console.log(sourceData)
+            for (let index = 0; index < sourceData.length; index++) {
+                await $.get(SERVER_HOST + '/transaction/' + sourceData[index].id_transaction).then(data => {
+                    // console.log(JSON.parse(data))
+                    sourceData[index].transactions = JSON.parse(data)
+                }).catch(err => console.log(err))
+            }
             sourceData.forEach(transaction => {
+                const container = $('<div></div>')
+                console.log(transaction.transactions)
+                transaction.transactions.forEach(dt => {
+                    container.append($('<pre></pre>').text(`${dt.item}($${dt.price}) x ${dt.qty} = $${dt.sbt}`))
+                })
+
                 let baseRow = $("<tr></tr>")
                 baseRow.append($("<td></td>").text(transaction.id_transaction))
                 baseRow.append($("<td></td>").text(transaction.employee_name))
                 baseRow.append($("<td></td>").text(transaction.customer_name))
                 baseRow.append($("<td></td>").text(transaction.transaction_date))
-                baseRow.append($("<td></td>").text(transaction.total))
-                baseRow.append($("<td></td>").append($(`<button class="btn btn-danger" onClick="deleteTransaction(${transaction.id_transaction})"></button>`).append(`<i class="bi bi-person-dash-fill"></i>`)))
+                baseRow.append($("<td></td>").text(`$${transaction.total}`))
+                baseRow.append($("<td></td>").append($(`<button class="btn btn-danger" onClick="deleteTransaction(${transaction.id_transaction})"></button>`).append(`<i class="bi bi-person-dash-fill"></i>`)).append($(`<button id="toggleModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detail-${transaction.id_transaction}">Detail</button>`)))
+
+                baseRow
+                    .append($(`<div class='modal fade' id="detail-${transaction.id_transaction}"></div>`)
+                        .append($('<div class="modal-dialog"></div>')
+                            .append($('<div class="modal-content"></div>')
+                                .append($('<div class="modal-header"></div>')
+                                    .append($('<h1 class="modal-title"></h1>').text(`${transaction.customer_name}`))
+                                    .append($('<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>')))
+                                .append($('<div class="modal-body"></div>').append(container))
+                                .append($('<div class="modal-footer"></div>')
+                                    .append($('<button type="button" class="btn btn-secondary" data-bs-dismiss="modal"></button>').text('Close'))
+                                    // .append($('<button type="button" class="btn btn-primary"></button>').text('Save Changes'))
+                                ))
+                        )
+                    )
                 tableBody.append(baseRow)
             })
         })
-} 
+
+}
